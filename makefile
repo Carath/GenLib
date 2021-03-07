@@ -14,12 +14,18 @@ OBJ_DIR = obj
 ##########################################################
 # Compiler options:
 
+# For better performance:
+PROCESSOR_ARCH = -march=native
+
+# Multithreading API:
+# OPENMP = -fopenmp
+
 # N.B: gcc for C, g++ for C++, alternative: clang.
 CC = gcc
 CPPFLAGS =
-CFLAGS = -std=c99 -Wall -O2
+CFLAGS = -std=c99 -Wall -O2 $(PROCESSOR_ARCH) $(OPENMP)
 LDFLAGS =
-LDLIBS = -lm
+LDLIBS = $(OPENMP) -lm
 
 ##########################################################
 # Collecting files:
