@@ -21,9 +21,9 @@ extern const GeneticMethods GeneMeth_salesman_3;
 // However versions starting with a value > 0 seem to be way slower...
 static inline void getStrictCouple(void *rng, int *i, int *j, int n)
 {
-	*i = rng32_next(rng) % n;
+	*i = rng32_nextInt(rng) % n;
 
-	do { *j = rng32_next(rng) % n; }
+	do { *j = rng32_nextInt(rng) % n; }
 	while (*i == *j);
 
 	if (*i > *j)

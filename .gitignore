@@ -1,3 +1,6 @@
+# Standard C .gitignore
 *.o
 *.a
-exec
+*.so
+*.out
+*.exe

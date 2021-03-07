@@ -6,23 +6,16 @@ extern "C" {
 #endif
 
 
-// Used to measure elapsed time. Thread safe.
+#include <stdint.h>
 
-#ifndef _WIN32
-#include <sys/time.h>
-__attribute__((unused)) static double get_time(void)
-{
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-	return (double) tv.tv_sec + (double) tv.tv_usec / 1000000.;
-}
-#else
-#include <windows.h>
-__attribute__((unused)) static double get_time(void)
-{
-	return (double) GetTickCount() / 1000.;
-}
-#endif
+
+// Used to measure elapsed time, in seconds. Thread safe.
+double get_time(void);
+
+
+// Used to create RNG different seeds per nanosecond. A pointer to a memory block can
+// also be given to yield a unique seed per process, however it can be left to NULL.
+uint64_t create_seed(void *address);
 
 
 #if __cplusplus

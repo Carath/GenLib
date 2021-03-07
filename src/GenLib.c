@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h> // for initializing the RNG.
 #include <math.h> // for +INFINITY
 
 #include "GenLib.h"
@@ -50,12 +49,12 @@ inline static int selection(const Species *species, rng32 *rng)
 {
 	if (species -> genMeth -> selectionMode == SEL_UNIFORM)
 	{
-		return rng32_next(rng) % species -> populationSize; // faster, but theorically less good...
+		return rng32_nextInt(rng) % species -> populationSize; // faster, but theorically less good...
 	}
 
 	else // SEL_PROPORTIONATE
 	{
-		const double threshold = species -> sumFitnesses * rng32_float(rng);
+		const double threshold = species -> sumFitnesses * rng32_nextFloat(rng);
 		double partial_sum = 0.;
 		int index = 0;
 
@@ -165,7 +164,8 @@ Species* createSpecies(const GeneticMethods *genMeth, const void *context, int p
 	Species *species = (Species*) calloc(1, sizeof(Species));
 
 	rng32 rng; // 32-bit RNG.
-	rng32_init(&rng, time(NULL), (intptr_t) species); // species' address passed as stream ID.
+	uint64_t seed = create_seed(species);
+	rng32_init(&rng, seed, 0);
 
 	*(int*) &(species -> populationSize) = population_size;
 	species -> population = (void**) calloc(population_size, sizeof(void*));
@@ -241,7 +241,8 @@ double geneticSearch(Species *species, int epoch_number)
 	const void *context = species -> context;
 
 	rng32 rng; // 32-bit RNG.
-	rng32_init(&rng, time(NULL), (intptr_t) species); // species' address passed as stream ID.
+	uint64_t seed = create_seed(species);
+	rng32_init(&rng, seed, 0);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Starting the evolution process:

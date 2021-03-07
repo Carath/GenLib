@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <time.h>
 
 #include "salesman.h"
 #include "matrix.h"
 #include "sales_gen.h" // for swap()
+#include "get_time.h" // for create_seed()
 
 
 // Euclidean distance between (x1, y1) and (x2, y2).
@@ -56,7 +56,8 @@ void initMap(Map *map, FillingMode fillMode, DistanceRounding distMode)
 	if (fillMode == RANDOM)
 	{
 		rng32 rng;
-		rng32_init(&rng, time(NULL), (intptr_t) map);
+		uint64_t seed = create_seed(map);
+		rng32_init(&rng, seed, 0);
 
 		randomFloatMatrix_uniform(&rng, map -> Locations, map -> CitiesNumber, 2, 0, DIST_BOUND);
 	}
@@ -121,13 +122,13 @@ void initPath(void *rng, int *path, int length, InitMode initMode)
 		return;
 
 	// const int step_number = length; // too far.
-	const int step_number = rng32_next(rng) % length;
+	const int step_number = rng32_nextInt(rng) % length;
 
 	for (int step = 0; step < step_number; ++step)
 	{
 		// 0 fixed!
-		int i = 1 + rng32_next(rng) % (length - 1);
-		int j = 1 + rng32_next(rng) % (length - 1);
+		int i = 1 + rng32_nextInt(rng) % (length - 1);
+		int j = 1 + rng32_nextInt(rng) % (length - 1);
 
 		swap(path, i, j);
 	}

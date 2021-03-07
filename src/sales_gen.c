@@ -90,7 +90,7 @@ void crossover_1(const void *context, void *rng, void *gene_tofill, const void *
 
 		else
 		{
-			int picked = rng32_next(rng) % 2;
+			int picked = rng32_nextInt(rng) % 2;
 			new_path[picked ? pivot_index : found_index] = pivot;
 		}
 	}
@@ -112,7 +112,7 @@ void crossover_2(const void *context, void *rng, void *gene_tofill, const void *
 	int *path_1 = (int*) gene_1, *path_2 = (int*) gene_2, *new_path = (int*) gene_tofill;
 
 	int start = 1; // First city fixed!
-	const int pivot = rng32_next(rng) % length;
+	const int pivot = rng32_nextInt(rng) % length;
 
 	if (!CountBuffer)
 		CountBuffer = (int*) calloc(length, sizeof(int));
@@ -138,7 +138,7 @@ void crossover_2(const void *context, void *rng, void *gene_tofill, const void *
 
 	int begin = start, end = pivot;
 
-	if (rng32_next(rng) % 2)
+	if (rng32_nextInt(rng) % 2)
 	{
 		begin = pivot + 1;
 		end = length - 1;
@@ -170,7 +170,7 @@ void crossover_3(const void *context, void *rng, void *gene_tofill, const void *
 	int *path_1 = (int*) gene_1, *path_2 = (int*) gene_2, *new_path = (int*) gene_tofill;
 
 	const int start = 1; // First city fixed!
-	const int pivot = rng32_next(rng) % length;
+	const int pivot = rng32_nextInt(rng) % length;
 
 	for (int i = start; i < length; ++i)
 	{
@@ -219,8 +219,8 @@ void mutation_1(const void *context, void *rng, void *gene, int epoch)
 	else
 	{
 		// First city fixed! May be a little faster than the alternative:
-		city_1 = 1 + rng32_next(rng) % (length - 1);
-		city_2 = 1 + rng32_next(rng) % (length - 1);
+		city_1 = 1 + rng32_nextInt(rng) % (length - 1);
+		city_2 = 1 + rng32_nextInt(rng) % (length - 1);
 	}
 
 	swap(new_path, city_1, city_2);

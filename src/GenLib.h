@@ -2,7 +2,7 @@
 // Small library implementing a general purpose genetic search algorithm.
 // Said genetic search is thread-safe, and several can be run in parallel on different
 // species. The user must provide genetic operators, for GenLib to run the search.
-// To use it, the files GenLib.c, GenLib.h, get_time.h and rng32.h must be included.
+// To use it, copy the files: GenLib.c, GenLib.h, get_time.c, get_time.h and rng32.h.
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef GENLIB_H
@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#define GENLIB_VERSION 1.3
+#define GENLIB_VERSION 1.4
 
 ////////////////////////////////////////////////////////////////////////////////
 // Settings:

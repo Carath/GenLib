@@ -80,7 +80,7 @@ void randomFloatMatrix_uniform(void *rng, num_map **matrix, int rows, int cols, 
 	{
 		for (int j = 0; j < cols; ++j)
 		{
-			matrix[i][j] = rng32_float(rng) * (max - min) + min;
+			matrix[i][j] = rng32_nextFloat(rng) * (max - min) + min;
 		}
 	}
 }

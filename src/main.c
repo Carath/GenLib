@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-// #include <time.h> // for initializing the RNG.
-// #include <math.h>
 
 #include "GenLib.h"
 #include "sinus_example.h"
@@ -37,7 +35,7 @@ void test_TSP(void)
 	// DistanceRounding distMode = EXACT;
 	DistanceRounding distMode = ROUNDED;
 
-	// Map *map = createMap(50, RANDOM, distMode); // Same map every time!
+	// Map *map = createMap(50, RANDOM, distMode); // Same map every run!
 	Map *map = getMapFromDataset("datasets/berlin52.tsp", distMode); // from TSPLIB
 	// Map *map = getMapFromDataset("datasets/a280.tsp", distMode); // from TSPLIB
 
@@ -114,6 +112,7 @@ void test_TSP(void)
 
 	// destroySpecies(&species_3);
 
+	///////////////////////////////////////////////////////
 
 	freeMap(&map);
 }

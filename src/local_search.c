@@ -2,11 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <time.h>
 
 #include "local_search.h"
 #include "sales_gen.h"
-// #include "GenLib.h" // for get_time();
 #include "get_time.h"
 #include "rng32.h"
 
@@ -107,7 +105,7 @@ static void simulated_annealing(const void *context, const Map *map, void *rng, 
 			float move_probability = delta > 0. ? 1.f : expf(delta / temperature); // ... precomputing?
 			// float move_probability = 1.f / (1.f + expf(-delta / temperature));
 
-			float roll = rng32_float(rng);
+			float roll = rng32_nextFloat(rng);
 
 			if (roll < move_probability)
 			{
@@ -274,7 +272,8 @@ double localSearch(const void *context, const Map *map, int population_size, int
 	}
 
 	rng32 rng;
-	rng32_init(&rng, time(NULL), (intptr_t) population);
+	uint64_t seed = create_seed(population);
+	rng32_init(&rng, seed, 0);
 
 	// Initialization:
 

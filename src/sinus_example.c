@@ -17,7 +17,7 @@ void* createGene(const void *context, void *rng)
 	double *new_gene = (double*) calloc(1, sizeof(double));
 
 	// *new_gene = TWO_PI * (float) rand() / RAND_MAX;
-	*new_gene = TWO_PI * rng32_float(rng); // optional
+	*new_gene = TWO_PI * rng32_nextFloat(rng); // optional
 
 	return new_gene;
 }
@@ -54,7 +54,7 @@ void crossover(const void *context, void *rng, void *new_gene, const void *gene_
 void mutation(const void *context, void *rng, void *gene, int epoch)
 {
 	// double threshold = ((float) rand() / RAND_MAX * 2.f * MUT_RANGE - MUT_RANGE) / (epoch + 1);
-	double threshold = (rng32_float(rng) * 2.f * MUT_RANGE - MUT_RANGE) / (epoch + 1); // optional
+	double threshold = (rng32_nextFloat(rng) * 2.f * MUT_RANGE - MUT_RANGE) / (epoch + 1); // optional
 
 	double *gene_ = (double*) gene;
 

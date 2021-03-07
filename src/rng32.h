@@ -1,7 +1,7 @@
 /*
  * Wrapper for a generic 32-bit random number generator.
  *
- * Ideally, this should only be included in source files, for it contains functions bodies
+ * Ideally, rng32.h should only be included in source files, for it contains functions bodies
  * to be inlined. Those functions are thread-safe, as long as each thread uses its own rng:
  *
  * - Initializing the internal state of the given rng. The 'stream' parameter
@@ -11,11 +11,11 @@
  *
  * - Generating the next unsigned 32-bit integer, from the given rng:
  *
- *     uint32_t rng32_next(void *generic_rng32);
+ *     uint32_t rng32_nextInt(void *generic_rng32);
  *
  * - Generating a float uniformly between 0. and 1., from the given rng:
  *
- *     float rng32_float(void *generic_rng32);
+ *     float rng32_nextFloat(void *generic_rng32);
  *
  * A stream, when available, is useful for producing distincts sequences of random number,
  * from the same rng and the same seed. Finally, RNG32_MAX is the maximum value that the
@@ -29,12 +29,16 @@
  *
  * rng32 rng;
  * rng32_init(&rng, time(NULL), 0);
- * printf("%d\n", rng32_next(&rng) % 10);
+ * printf("%d\n", rng32_nextInt(&rng) % 10);
+ *
+ * Be wary that the resolution of time() is only the second, thus it may not be suited to provide
+ * parallel processes with unique seeds. Use either a finer time resolution for this, or better
+ * an index unique for each processes, or even the address of a resource unique to each of them.
 */
 /* --------------------------------------------------------------------------- */
 /*
  * What follows basically is the implementation of the 32-bit PCG RNG, stripped of the
- * global rng, with the addition of the function rng32_float(), and everything wrapped
+ * global rng, with the addition of the function rng32_nextFloat(), and everything wrapped
  * in a generic form for ease of use/change. Functions are also inlined for speed.
 */
 
@@ -80,7 +84,7 @@ typedef struct
 
 #define RNG32_MAX UINT_MAX
 
-static inline uint32_t rng32_next(void *generic_rng32)
+static inline uint32_t rng32_nextInt(void *generic_rng32)
 {
 	rng32 *rng = (rng32*) generic_rng32;
 	uint64_t oldstate = rng->state;
@@ -95,14 +99,14 @@ __attribute__((unused)) static void rng32_init(void *generic_rng32, uint64_t see
 	rng32 *rng = (rng32*) generic_rng32;
 	rng->state = 0U;
 	rng->inc = (stream << 1u) | 1u;
-	rng32_next(rng);
+	rng32_nextInt(rng);
 	rng->state += seed;
-	rng32_next(rng);
+	rng32_nextInt(rng);
 }
 
-static inline float rng32_float(void *generic_rng32)
+static inline float rng32_nextFloat(void *generic_rng32)
 {
-	return (float) rng32_next(generic_rng32) / RNG32_MAX;
+	return (float) rng32_nextInt(generic_rng32) / RNG32_MAX;
 }
 
 #if __cplusplus
