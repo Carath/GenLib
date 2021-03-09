@@ -4,7 +4,7 @@
 
 // Settings:
 
-#define DEFAULT_INIT_MODE RANDOM_INIT // RANDOM_INIT doesn't seem to help much...
+#define DEFAULT_INIT_MODE BIASED_RANDOM_INIT // *_RANDOM_INIT doesn't seem to help much...
 
 #define SYMMETRIC_TSP 1
 #define SYMMETRY_PREVENTION_OPTION 0 // appealing idea, but terrible in practice... Do _not_ use it!
@@ -22,7 +22,7 @@
 
 typedef enum {EXACT, ROUNDED} DistanceRounding;
 typedef enum {RANDOM, CUSTOM} FillingMode;
-typedef enum {TRIVIAL_INIT, RANDOM_INIT} InitMode;
+typedef enum {TRIVIAL_INIT, BIASED_RANDOM_INIT, FULL_RANDOM_INIT} InitMode;
 
 
 typedef struct
@@ -53,6 +53,10 @@ void printMap(const Map *map);
 
 
 void printPath(const int *path, int length);
+
+
+// Fisher–Yates shuffle, for an array of integers:
+void shuffle(void *rng, int *array, int len);
 
 
 // Init a path, randomly or not, starting from a valid position. First city fixed !!!

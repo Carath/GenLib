@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Small library implementing a general purpose genetic search algorithm.
-// Said genetic search is thread-safe, and several can be run in parallel on different
-// species. The user must provide genetic operators, for GenLib to run the search.
+// Said library is thread-safe if used correctly, i.e several searches can be run in parallel
+// on different species. The user must provide genetic operators, for GenLib to run the search.
 // To use it, copy the files: GenLib.c, GenLib.h, get_time.c, get_time.h and rng32.h.
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#define GENLIB_VERSION 1.4
+#define GENLIB_VERSION 1.5
 
 ////////////////////////////////////////////////////////////////////////////////
 // Settings:
@@ -20,8 +20,8 @@ extern "C" {
 // Recommended setting. This has a negligeable impact on execution time, yet assures
 // that fitness values are correct for use with the SEL_PROPORTIONATE selection, by shifting
 // those values so that they are > 0. Incorrect values may result in array overflows!
-// In addition, this as the benefit of bringing initial fitness values close to 0, to improve on
-// SEL_PROPORTIONATE effects.
+// In addition, this as both the benefit of enabling the use of negative fitness values,
+// and of bringing initial fitness values close to 0, to improve on SEL_PROPORTIONATE effects.
 #define GL_SHIFTING_ENABLED 1
 
 
@@ -33,14 +33,14 @@ extern "C" {
 ////////////////////////////////////////////////////////////////////////////////
 // Genetic struct:
 
-// In order to be able to run several genetic search in parallel, one would need to not use rand(), but
+// In order to be able to run several genetic searches in parallel, one would need to not use rand(), but
 // instead use the Random Number Generator furnished as 'rng', in the crossover, mutation and copyGene operators.
-// Instructions on how to use this rng is detailed in the 'rng32.h' file. Note that this rng will be initialed
+// Instructions on how to use this rng are detailed in the 'rng32.h' file. Note that this rng will be initialized
 // internally, and that its use is totally optional, as rand() may still be used for non-parallel searches,
-// although doing this may be slightly slower...
+// although doing this may be slower...
 
 
-// PROBABILISTIC: choice made with probability proportional to the ratio between the gene's fitness, and
+// SEL_PROPORTIONATE: choice made with probability proportional to the ratio between the gene's fitness, and
 // the sum of all fitness values. An UNIFORM selection is worse theorically, but it works and is way faster.
 typedef enum {SEL_PROPORTIONATE, SEL_UNIFORM} SelectionMode;
 
@@ -67,10 +67,12 @@ typedef struct
 	////////////////////////////////////////////////////////////////////////////////
 	// Genetic functions - problem dependant:
 
-	// Fitness function, to evaluate a gene performance. Values must be > 0.
+	// Fitness function, to evaluate a gene performance. The higher the value, the better the gene must be.
+	// As long as GL_SHIFTING_ENABLED = 1, there is no limitation on the sign of the fitness values.
+	// Thus a maximization problem can easily be transformed to a minimization one, by playing with the sign.
 	double (*fitness)(const void *context, const void *gene, int epoch);
 
-	// Crossover beetween two genes:
+	// Crossover beetween two genes. Note that the given fitness values will be shifted, as to be > 0.
 	void (*crossover)(const void *context, void *rng, void *gene_tofill, const void *gene_1, const void *gene_2,
 		double fitness_1, double fitness_2, int epoch);
 

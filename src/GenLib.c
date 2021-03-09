@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h> // for +INFINITY
 
 #include "GenLib.h"
 #include "get_time.h"
@@ -14,65 +13,10 @@
 // Private genetic functions - problem independant:
 
 
-// Must be called at least once during the setup phase, and everytime the fitness function changes.
-static void updatePopulationFitness(Species *species, int epoch)
-{
-	const int shift_status = species -> genMeth -> selectionMode == SEL_PROPORTIONATE;
-	const int population_size = species -> populationSize;
-	double sum = 0., worst_fitness = +INFINITY;
-
-	for (int i = 0; i < population_size; ++i)
-	{
-		species -> fitnessArray[i] = species -> genMeth -> fitness(species -> context, species -> population[i], epoch);
-
-		sum += species -> fitnessArray[i];
-
-		if (GL_SHIFTING_ENABLED && shift_status && species -> fitnessArray[i] < worst_fitness)
-			worst_fitness = species -> fitnessArray[i];
-	}
-
-	if (GL_SHIFTING_ENABLED && shift_status)
-	{
-		species -> fitnessShift = EPSILON - worst_fitness;
-		species -> sumFitnesses = sum + population_size * species -> fitnessShift;
-
-		for (int i = 0; i < population_size; ++i)
-			species -> fitnessArray[i] += species -> fitnessShift;
-	}
-}
-
-
-// Selecting a gene from the population, according to the given SelectionMode.
-// SEL_PROPORTIONATE: choice made with probability proportional to the ratio between the gene's fitness,
-// and the sum of all fitness values. An SEL_UNIFORM selection is worse theorically, but it works and is way faster.
-inline static int selection(const Species *species, rng32 *rng)
-{
-	if (species -> genMeth -> selectionMode == SEL_UNIFORM)
-	{
-		return rng32_nextInt(rng) % species -> populationSize; // faster, but theorically less good...
-	}
-
-	else // SEL_PROPORTIONATE
-	{
-		const double threshold = species -> sumFitnesses * rng32_nextFloat(rng);
-		double partial_sum = 0.;
-		int index = 0;
-
-		while (index < species -> populationSize && partial_sum <= threshold)
-		{
-			partial_sum += species -> fitnessArray[index];
-			++index;
-		}
-
-		return index - 1;
-	}
-}
-
-
 // Searching for the gene of lower fitness:
 static int indexWorst(const Species *species)
 {
-	double worst_fitness = species -> fitnessArray[0];
+	double worst_fitness = species -> fitnessArray[0]; // populationSize > 0
 	int index_worst = 0;
 
 	for (int index = 1; index < species -> populationSize; ++index)
@@ -91,7 +35,7 @@ static int indexWorst(const Species *species)
 // Searching for the gene of greater fitness:
 static int indexBest(const Species *species)
 {
-	double best_fitness = species -> fitnessArray[0];
+	double best_fitness = species -> fitnessArray[0]; // populationSize > 0
 	int index_best = 0;
 
 	for (int index = 1; index < species -> populationSize; ++index)
@@ -107,6 +51,64 @@ static int indexBest(const Species *species)
 }
 
 
+// Shifting the fitness values, as to force them to be > 0,
+// which is necessary when using SEL_PROPORTIONATE.
+static void shiftFitnesses(Species *species)
+{
+	if (GL_SHIFTING_ENABLED)
+	{
+		int index_worst = indexWorst(species);
+		double worst_fitness = species -> fitnessArray[index_worst];
+
+		species -> fitnessShift = EPSILON - worst_fitness;
+		species -> sumFitnesses += species -> populationSize * species -> fitnessShift;
+
+		for (int i = 0; i < species -> populationSize; ++i)
+			species -> fitnessArray[i] += species -> fitnessShift;
+	}
+}
+
+
+// Must be called at least once during the setup phase, and everytime the fitness function changes.
+static void updatePopulationFitness(Species *species, int epoch)
+{
+	species -> sumFitnesses = 0.;
+
+	for (int i = 0; i < species -> populationSize; ++i)
+	{
+		species -> fitnessArray[i] = species -> genMeth -> fitness(species -> context, species -> population[i], epoch);
+		species -> sumFitnesses += species -> fitnessArray[i];
+	}
+
+	shiftFitnesses(species);
+}
+
+
+// Selecting a gene from the population, according to the given SelectionMode.
+// SEL_PROPORTIONATE: choice made with probability proportional to the ratio between the gene's fitness,
+// and the sum of all fitness values. An SEL_UNIFORM selection is worse theorically, but it works and is way faster.
+inline static int selection(const Species *species, rng32 *rng)
+{
+	if (species -> genMeth -> selectionMode == SEL_UNIFORM)
+		return rng32_nextInt(rng) % species -> populationSize; // faster, but theorically less good...
+
+	else // SEL_PROPORTIONATE
+	{
+		const double threshold = species -> sumFitnesses * rng32_nextFloat(rng);
+		double partial_sum = 0.;
+		int index = 0;
+
+		while (index < species -> populationSize && partial_sum <= threshold)
+		{
+			partial_sum += species -> fitnessArray[index];
+			++index;
+		}
+
+		return index - 1;
+	}
+}
+
+
 // Replacing the worst gene by a new one, if the latter is better, and if so updates the sum of fitnesses
 // and returns 1. Also, assures that no negative fitness can be added when using SEL_PROPORTIONATE.
 static int replace(Species *species, int index_worst, int epoch, int *epoch_best)
@@ -116,7 +118,7 @@ static int replace(Species *species, int index_worst, int epoch, int *epoch_best
 
 	if (new_fitness > species -> fitnessArray[index_worst]) // optimization!
 	{
-		// Updating the sum of the inverse of the lengths:
+		// Updating the sum of the fitness values:
 		species -> sumFitnesses += new_fitness - species -> fitnessArray[index_worst];
 
 		// Updating the length of the new path:
@@ -158,6 +160,12 @@ Species* createSpecies(const GeneticMethods *genMeth, const void *context, int p
 	if (!genMeth)
 	{
 		printf("\nNULL 'genMeth' in 'createSpecies()'.\n");
+		return NULL;
+	}
+
+	if (population_size < 1)
+	{
+		printf("\nPopulation size must be at least 1.\n");
 		return NULL;
 	}
 

@@ -112,6 +112,21 @@ void printPath(const int *path, int length)
 }
 
 
+// Fisher–Yates shuffle, for an array of integers:
+void shuffle(void *rng, int *array, int len)
+{
+	// In case RNG32_MAX is small, for some (terrible) RNG...
+	if (len >= RNG32_MAX)
+		printf("\nArray length (%d) is greater or equal to RNG32_MAX!\n\n", len);
+
+	for (unsigned int i = len - 1; i >= 1; --i)
+	{
+		unsigned int j = rng32_nextInt(rng) % (i + 1); // 0 ≤ j ≤ i. Biased, but negligeable.
+		swap(array, i, j);
+	}
+}
+
+
 // Init a path, randomly or not, starting from a valid position. First city fixed !!!
 void initPath(void *rng, int *path, int length, InitMode initMode)
 {
@@ -121,16 +136,25 @@ void initPath(void *rng, int *path, int length, InitMode initMode)
 	if (initMode == TRIVIAL_INIT)
 		return;
 
-	// const int step_number = length; // too far.
-	const int step_number = rng32_nextInt(rng) % length;
-
-	for (int step = 0; step < step_number; ++step)
+	else if (initMode == BIASED_RANDOM_INIT)
 	{
-		// 0 fixed!
-		int i = 1 + rng32_nextInt(rng) % (length - 1);
-		int j = 1 + rng32_nextInt(rng) % (length - 1);
+		// const int step_number = length; // too far.
+		// No need of more than 'length' transpositions...
+		const int step_number = rng32_nextInt(rng) % length;
 
-		swap(path, i, j);
+		for (int step = 0; step < step_number; ++step)
+		{
+			// 0 fixed!
+			int i = 1 + rng32_nextInt(rng) % (length - 1);
+			int j = 1 + rng32_nextInt(rng) % (length - 1);
+			swap(path, i, j);
+		}
+	}
+
+	else // FULL_RANDOM_INIT
+	{
+		// This should be better in theory... but it's not...
+		shuffle(rng, path + 1, length - 1); // 0 fixed!
 	}
 
 	// Preventing useless symmetric representation:

@@ -287,7 +287,8 @@ double localSearch(const void *context, const Map *map, int population_size, int
 			exit(EXIT_FAILURE);
 		}
 
-		initPath(&rng, population[i], cities_number, RANDOM_INIT); // RANDOM_INIT best for greedy_method()
+		// *_RANDOM_INIT best for greedy_method()
+		initPath(&rng, population[i], cities_number, BIASED_RANDOM_INIT);
 	}
 
 	// Search:
