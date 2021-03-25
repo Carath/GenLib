@@ -11,7 +11,7 @@ The other files are for demonstration purposes.
 
 ## Compilation
 
-Compiling is done by running ``` make ```. Note that when modifying header files, ``` make clean ``` must be run beforehand.
+Compiling is done by running ``` make ```.
 
 
 ## Runtime
