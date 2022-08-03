@@ -17,7 +17,7 @@ typedef enum {STOCHASTIC, GREEDY, SA, TA} localSearchMode;
 
 
 // Local search using 2-op heuristic. Returns the best found length:
-double localSearch(const void *context, const Map *map, int population_size, int epoch_number, localSearchMode mode);
+double localSearch(const void *context, const Map *map, int population_size, size_t epoch_number, localSearchMode mode);
 
 
 #endif

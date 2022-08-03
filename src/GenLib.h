@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#define GENLIB_VERSION 1.5
+#define GENLIB_VERSION 1.6
 
 ////////////////////////////////////////////////////////////////////////////////
 // Settings:
@@ -55,13 +55,13 @@ typedef struct
 	////////////////////////////////////////////////////////////////////////////////
 	// Gene basic functions:
 
-	// Must allocate dynamically, and initialize.
+	// Must allocate dynamically, and initialize the gene.
 	void* (*createGene)(const void *context, void *rng);
 
-	// A deep copy may be wanted here.
+	// A deep copy may be needed here, depending on the gene type.
 	void (*copyGene)(const void *context, void *gene_tofill, const void *gene);
 
-	// Free a gene.
+	// Freeing a gene.
 	void (*destroyGene)(const void *context, void *gene);
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -70,18 +70,20 @@ typedef struct
 	// Fitness function, to evaluate a gene performance. The higher the value, the better the gene must be.
 	// As long as GL_SHIFTING_ENABLED = 1, there is no limitation on the sign of the fitness values.
 	// Thus a maximization problem can easily be transformed to a minimization one, by playing with the sign.
-	double (*fitness)(const void *context, const void *gene, int epoch);
+	// Furthermore, the outputs of this function can be made to change through time - time being represented by 'epoch'.
+	double (*fitness)(const void *context, const void *gene, size_t epoch);
 
 	// Crossover beetween two genes. Note that the given fitness values will be shifted, as to be > 0.
 	void (*crossover)(const void *context, void *rng, void *gene_tofill, const void *gene_1, const void *gene_2,
-		double fitness_1, double fitness_2, int epoch);
+		double fitness_1, double fitness_2, size_t epoch);
 
-	// Mutates the newborn gene.
-	void (*mutation)(const void *context, void *rng, void *gene, int epoch);
+	// Mutates the newborn gene. A mutation probability (e.g of 0.1) can easily be added by doing inside the function:
+	// if (rng32_nextFloat(rng) < 0.1f) { /* do the mutation */ }
+	void (*mutation)(const void *context, void *rng, void *gene, size_t epoch);
 
 	// Will trigger an updatePopulationFitness() when returning 1. Do not use it too often,
 	// for this will slow down the genetic search and hinder the convergence. Can be left to NULL.
-	int (*setFitnessUpdateStatus)(const void *context, int epoch);
+	int (*setFitnessUpdateStatus)(const void *context, size_t epoch);
 
 } GeneticMethods;
 
@@ -93,18 +95,18 @@ typedef struct
 {
 	const int populationSize;
 	void **population;
-	double *fitnessArray;
-	void *bestGene;
+	double *fitnessArray; // may contain *shifted* fitnesses.
+	void *geneBuffer;
 	double sumFitnesses;
 	double fitnessShift;
 
-	// Saved only for convenience:
+	// Saved here for convenience:
 	const GeneticMethods *genMeth;
-	const void *context;
+	const void *context; // This represents the environment. It can be NULL.
 } Species;
 
 
-// Creating a new species.
+// Creating a new species. Note: 'population_size' shouldn't be greater than a few thousands to keep the search fast.
 Species* createSpecies(const GeneticMethods *genMeth, const void *context, int population_size);
 
 
@@ -112,9 +114,9 @@ Species* createSpecies(const GeneticMethods *genMeth, const void *context, int p
 void destroySpecies(Species **species_address);
 
 
-// Genetic search. A 'good' gene is beeing seeked by evolving from a population, and then saved
-// in 'species -> bestGene'. Returns the (unshifted) best found fitness. 'context' may be NULL.
-double geneticSearch(Species *species, int epoch_number);
+// Genetic search. 'Good' genes are beeing seeked by evolving from a population, and the best
+// found gene is saved in 'species -> geneBuffer' and its (unshifted) fitness is returned.
+double geneticSearch(Species *species, size_t epoch_number);
 
 
 #if __cplusplus

@@ -54,7 +54,7 @@ $(EXE): $(OBJ)
 
 # Compiling the source files:
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) -MP -MD $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+	$(CC) -MP -MMD $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 -include $(DEP)
 

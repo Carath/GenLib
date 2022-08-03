@@ -3,6 +3,14 @@
 *Note: version numbers prior to 1.3 were not coupled with proper GenLib versions. They have therefore been retconned, has to both keep a trace of the most important changes in GenLib, and to be consistent with the real versioning.*
 
 
+## v1.6
+
+- Used loop unrolling to speedup the worst gene search.
+- Renamed more appropriately 'bestGene' to 'geneBuffer'.
+- Fixed first worst gene index not being computed.
+- Epochs type changed from 'int' to 'size_t', to be able to search for more than 4 billion epochs.
+
+
 ## v1.5
 
 - Made GenLib API more consistent by forcing the fitness shifting (when GL_SHIFTING_ENABLED = 1), thus fitness values given in the crossover operator do not radically depend on the choice of selection.

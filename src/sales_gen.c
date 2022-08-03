@@ -31,7 +31,7 @@ static void destroyGene(const void *context, void *gene)
 }
 
 
-static double fitness(const void *context, const void *gene, int epoch)
+static double fitness(const void *context, const void *gene, size_t epoch)
 {
 	const Map *map = (Map*) context;
 
@@ -41,7 +41,7 @@ static double fitness(const void *context, const void *gene, int epoch)
 
 // This crossover only copies the given gene:
 void crossover_0(const void *context, void *rng, void *gene_tofill, const void *gene_1, const void *gene_2,
-	double fitness_1, double fitness_2, int epoch)
+	double fitness_1, double fitness_2, size_t epoch)
 {
 	copyGene(context, gene_tofill, gene_1);
 }
@@ -60,7 +60,7 @@ inline static int findIndexOfValue(const int *array, int length, int start, int 
 
 
 void crossover_1(const void *context, void *rng, void *gene_tofill, const void *gene_1, const void *gene_2,
-	double fitness_1, double fitness_2, int epoch)
+	double fitness_1, double fitness_2, size_t epoch)
 {
 	const Map *map = (Map*) context;
 	const int length = map -> CitiesNumber;
@@ -105,7 +105,7 @@ static int *CountBuffer = NULL; // No parallelization possible with this !!!
 // This should be added to the context, eventually.
 
 void crossover_2(const void *context, void *rng, void *gene_tofill, const void *gene_1, const void *gene_2,
-	double fitness_1, double fitness_2, int epoch)
+	double fitness_1, double fitness_2, size_t epoch)
 {
 	const Map *map = (Map*) context;
 	const int length = map -> CitiesNumber;
@@ -163,7 +163,7 @@ void crossover_2(const void *context, void *rng, void *gene_tofill, const void *
 
 // OK
 void crossover_3(const void *context, void *rng, void *gene_tofill, const void *gene_1, const void *gene_2,
-	double fitness_1, double fitness_2, int epoch)
+	double fitness_1, double fitness_2, size_t epoch)
 {
 	const Map *map = (Map*) context;
 	const int length = map -> CitiesNumber;
@@ -191,12 +191,12 @@ void crossover_3(const void *context, void *rng, void *gene_tofill, const void *
 
 
 // No mutation at all!
-void mutation_0(const void *context, void *rng, void *gene, int epoch)
+void mutation_0(const void *context, void *rng, void *gene, size_t epoch)
 {
 }
 
 
-void mutation_1(const void *context, void *rng, void *gene, int epoch)
+void mutation_1(const void *context, void *rng, void *gene, size_t epoch)
 {
 	const Map *map = (Map*) context;
 	const int length = map -> CitiesNumber;
@@ -227,7 +227,7 @@ void mutation_1(const void *context, void *rng, void *gene, int epoch)
 }
 
 
-void mutation_2(const void *context, void *rng, void *gene, int epoch)
+void mutation_2(const void *context, void *rng, void *gene, size_t epoch)
 {
 	const Map *map = (Map*) context;
 	const int length = map -> CitiesNumber;
@@ -295,7 +295,7 @@ const GeneticMethods GeneMeth_salesman_3 =
 
 // N.B:
 // .crossover = crossover_1, // slow...
-// .mutation = mutation_0, // shit
-// .mutation = mutation_1, // shit
+// .mutation = mutation_0, // terrible
+// .mutation = mutation_1, // terrible
 
 // Compiling with -Wunused-function will remove the 'unused static function' warning.

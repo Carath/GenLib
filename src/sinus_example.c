@@ -8,16 +8,16 @@
 #include "rng32.h" // optional
 
 
-#define TWO_PI 6.28f
-#define MUT_RANGE 0.3f
+#define PI 3.14159265359
+#define MUT_RANGE 0.3
 
 
 void* createGene(const void *context, void *rng)
 {
 	double *new_gene = (double*) calloc(1, sizeof(double));
 
-	// *new_gene = TWO_PI * (float) rand() / RAND_MAX;
-	*new_gene = TWO_PI * rng32_nextFloat(rng); // optional
+	// *new_gene = 2. * PI * (double) rand() / RAND_MAX;
+	*new_gene = 2. * PI * rng32_nextFloat(rng); // optional
 
 	return new_gene;
 }
@@ -35,14 +35,14 @@ void destroyGene(const void *context, void *gene)
 }
 
 
-double fitness(const void *context, const void *gene, int epoch)
+double fitness(const void *context, const void *gene, size_t epoch)
 {
 	return sin(*(double*) gene);
 }
 
 
 void crossover(const void *context, void *rng, void *new_gene, const void *gene_1, const void *gene_2,
-	double fitness_1, double fitness_2, int epoch)
+	double fitness_1, double fitness_2, size_t epoch)
 {
 	*(double*) new_gene = (*(double*) gene_1 + *(double*) gene_2) / 2.f;
 
@@ -51,9 +51,9 @@ void crossover(const void *context, void *rng, void *new_gene, const void *gene_
 }
 
 
-void mutation(const void *context, void *rng, void *gene, int epoch)
+void mutation(const void *context, void *rng, void *gene, size_t epoch)
 {
-	// double threshold = ((float) rand() / RAND_MAX * 2.f * MUT_RANGE - MUT_RANGE) / (epoch + 1);
+	// double threshold = ((double) rand() / RAND_MAX * 2.f * MUT_RANGE - MUT_RANGE) / (epoch + 1);
 	double threshold = (rng32_nextFloat(rng) * 2.f * MUT_RANGE - MUT_RANGE) / (epoch + 1); // optional
 
 	double *gene_ = (double*) gene;
@@ -63,8 +63,8 @@ void mutation(const void *context, void *rng, void *gene, int epoch)
 	if (*gene_ < 0.f)
 		*gene_ = 0.f;
 
-	if (*gene_ > TWO_PI)
-		*gene_ = TWO_PI;
+	if (*gene_ > 2. * PI)
+		*gene_ = 2. * PI;
 }
 
 
@@ -84,13 +84,16 @@ const GeneticMethods GeneMeth_sinus =
 void sinus_example(void)
 {
 	int population_size = 64;
-	int epoch_number = 10000;
+	size_t epoch_number = 100000ul;
 
 	Species *species_sinus = createSpecies(&GeneMeth_sinus, NULL, population_size);
 
 	geneticSearch(species_sinus, epoch_number);
 
-	printf("Best found abscissa: %f\n", *(double*) species_sinus -> bestGene);
+	double bestResult = *(double*) species_sinus -> geneBuffer;
+	double ref = PI / 2.;
+	printf("Best found value: %.12f\nExpected value:   %.12f\nRelative error: %.3e\n",
+		bestResult, ref, fabs(bestResult - ref) / ref);
 
 	destroySpecies(&species_sinus);
 }
