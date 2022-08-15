@@ -45,7 +45,7 @@ void test_TSP(void)
 
 	// For berlin52:
 	int population_size = 256;
-	size_t epoch_number = 200000ul * map -> CitiesNumber;
+	long epoch_number = 200000L * map -> CitiesNumber;
 
 	localSearch(NULL, map, 2 * population_size, 5.7 * epoch_number, STOCHASTIC);
 	localSearch(NULL, map, 2 * population_size, 1 * epoch_number, GREEDY);
@@ -56,7 +56,7 @@ void test_TSP(void)
 
 	// // For a280:
 	// int population_size = 256;
-	// size_t epoch_number = 100000ul * map -> CitiesNumber;
+	// long epoch_number = 100000L * map -> CitiesNumber;
 
 	// localSearch(NULL, map, 2. * population_size, 12 * epoch_number, STOCHASTIC);
 	// localSearch(NULL, map, population_size, 0.004 * epoch_number, GREEDY);

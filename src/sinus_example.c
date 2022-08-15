@@ -35,14 +35,14 @@ void destroyGene(const void *context, void *gene)
 }
 
 
-double fitness(const void *context, const void *gene, size_t epoch)
+double fitness(const void *context, const void *gene, long epoch)
 {
 	return sin(*(double*) gene);
 }
 
 
 void crossover(const void *context, void *rng, void *new_gene, const void *gene_1, const void *gene_2,
-	double fitness_1, double fitness_2, size_t epoch)
+	double fitness_1, double fitness_2, long epoch)
 {
 	*(double*) new_gene = (*(double*) gene_1 + *(double*) gene_2) / 2.f;
 
@@ -51,7 +51,7 @@ void crossover(const void *context, void *rng, void *new_gene, const void *gene_
 }
 
 
-void mutation(const void *context, void *rng, void *gene, size_t epoch)
+void mutation(const void *context, void *rng, void *gene, long epoch)
 {
 	// double threshold = ((double) rand() / RAND_MAX * 2.f * MUT_RANGE - MUT_RANGE) / (epoch + 1);
 	double threshold = (rng32_nextFloat(rng) * 2.f * MUT_RANGE - MUT_RANGE) / (epoch + 1); // optional
@@ -84,7 +84,7 @@ const GeneticMethods GeneMeth_sinus =
 void sinus_example(void)
 {
 	int population_size = 64;
-	size_t epoch_number = 100000ul;
+	long epoch_number = 100000L;
 
 	Species *species_sinus = createSpecies(&GeneMeth_sinus, NULL, population_size);
 

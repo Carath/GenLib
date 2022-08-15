@@ -3,6 +3,12 @@
 *Note: version numbers prior to 1.3 were not coupled with proper GenLib versions. They have therefore been retconned, has to both keep a trace of the most important changes in GenLib, and to be consistent with the real versioning.*
 
 
+## v1.7
+
+- Added a deterministic mode.
+- Epochs type changed from 'size_t' to 'long' for convenience.
+
+
 ## v1.6
 
 - Used loop unrolling to speedup the worst gene search.

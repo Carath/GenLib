@@ -98,7 +98,7 @@ static void shiftFitnesses(Species *species)
 
 
 // Must be called at least once during the setup phase, and everytime the fitness function changes.
-static void updatePopulationFitness(Species *species, size_t epoch)
+static void updatePopulationFitness(Species *species, long epoch)
 {
 	species -> sumFitnesses = 0.;
 
@@ -140,7 +140,7 @@ inline static int selection(const Species *species, rng32 *rng)
 
 // Replacing the worst gene by a new one if the latter is better, and if so updates the sum of fitnesses
 // and 'index_worst'. Also, assures that no negative fitness can be added when using SEL_PROPORTIONATE.
-static void replaceWorst(Species *species, int *index_worst, double new_fitness, size_t epoch, size_t *epoch_last_update)
+static void replaceWorst(Species *species, int *index_worst, double new_fitness, long epoch, long *epoch_last_update)
 {
 	if (*index_worst < 0) {
 		*index_worst = indexWorst(species); // Searching for the gene of lower fitness.
@@ -198,7 +198,7 @@ Species* createSpecies(const GeneticMethods *genMeth, const void *context, int p
 	Species *species = (Species*) calloc(1, sizeof(Species));
 
 	rng32 rng; // 32-bit RNG.
-	uint64_t seed = create_seed(species);
+	uint64_t seed = GL_DETERMINISTIC ? GL_DEFAULT_SEED : create_seed(species);
 	rng32_init(&rng, seed, 0);
 
 	*(int*) &(species -> populationSize) = population_size;
@@ -262,12 +262,12 @@ void destroySpecies(Species **species_address)
 
 // Genetic search. 'Good' genes are beeing seeked by evolving from a population, and the best
 // found gene is saved in 'species -> geneBuffer' and its (unshifted) fitness is returned.
-double geneticSearch(Species *species, size_t epoch_number)
+double geneticSearch(Species *species, long epoch_number)
 {
 	double time_start = get_time();
 
-	if (!species || !species -> genMeth || species -> populationSize < 1) {
-		printf("\nInvalid argument in 'geneticSearch'.\n\n");
+	if (!species || !species -> genMeth || species -> populationSize < 1 || epoch_number < 0) {
+		printf("\nInvalid argument in 'geneticSearch()'.\n\n");
 		return 0.;
 	}
 
@@ -275,16 +275,16 @@ double geneticSearch(Species *species, size_t epoch_number)
 	const void *context = species -> context;
 
 	rng32 rng; // 32-bit RNG.
-	uint64_t seed = create_seed(species);
+	uint64_t seed = GL_DETERMINISTIC ? GL_DEFAULT_SEED : create_seed(species);
 	rng32_init(&rng, seed, 0);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Starting the evolution process:
 
-	size_t epoch_last_update = 0;
+	long epoch_last_update = 0;
 	int index_worst = -1;
 
-	for (size_t epoch = 0; epoch < epoch_number; ++epoch)
+	for (long epoch = 0; epoch < epoch_number; ++epoch)
 	{
 		// Checking if the fitness values have to be updated:
 		if (genMeth -> setFitnessUpdateStatus && genMeth -> setFitnessUpdateStatus(context, epoch)) {

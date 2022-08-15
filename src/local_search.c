@@ -18,13 +18,13 @@ static const char *LC_StringArray[] = {"STOCHASTIC", "GREEDY", "SA", "TA"}; // h
 // Stochastically greedy, can easily be trapped in local minima, although it may still go out early on.
 // Still, close in solutions quality to GA for small-medium problems, but quite faster. Will always output
 // the best found solution found during the run.
-static void stochastic_method(const void *context, const Map *map, void *rng, int **population, int population_size, size_t epoch_number)
+static void stochastic_method(const void *context, const Map *map, void *rng, int **population, int population_size, long epoch_number)
 {
 	epoch_number /= population_size; // To be fair compared to previous algorithms.
 
 	const int cities_number = map -> CitiesNumber;
 
-	for (size_t epoch = 0; epoch < epoch_number; ++epoch)
+	for (long epoch = 0; epoch < epoch_number; ++epoch)
 	{
 		for (int path_index = 0; path_index < population_size; ++path_index)
 		{
@@ -58,7 +58,7 @@ static void stochastic_method(const void *context, const Map *map, void *rng, in
 
 
 // ...
-static void simulated_annealing(const void *context, const Map *map, void *rng, int **population, int population_size, size_t epoch_number)
+static void simulated_annealing(const void *context, const Map *map, void *rng, int **population, int population_size, long epoch_number)
 {
 	float temperature = *(float*) context;
 
@@ -78,7 +78,7 @@ static void simulated_annealing(const void *context, const Map *map, void *rng, 
 		}
 	}
 
-	for (size_t epoch = 0; epoch < epoch_number; ++epoch)
+	for (long epoch = 0; epoch < epoch_number; ++epoch)
 	{
 		for (int path_index = 0; path_index < population_size; ++path_index)
 		{
@@ -141,7 +141,7 @@ static void simulated_annealing(const void *context, const Map *map, void *rng, 
 
 
 // ...
-static void threshold_acceptance(const void *context, const Map *map, void *rng, int **population, int population_size, size_t epoch_number)
+static void threshold_acceptance(const void *context, const Map *map, void *rng, int **population, int population_size, long epoch_number)
 {
 	float temperature = *(float*) context;
 
@@ -149,7 +149,7 @@ static void threshold_acceptance(const void *context, const Map *map, void *rng,
 
 	const int cities_number = map -> CitiesNumber;
 
-	for (size_t epoch = 0; epoch < epoch_number; ++epoch)
+	for (long epoch = 0; epoch < epoch_number; ++epoch)
 	{
 		for (int path_index = 0; path_index < population_size; ++path_index)
 		{
@@ -189,13 +189,13 @@ static void threshold_acceptance(const void *context, const Map *map, void *rng,
 // Completely deterministic - and quite greedy! This _will_ get stuck in local minima.
 // This requires the population to be initialized randomly (else, better have a 'population_size' of 1).
 // Empirically provides good results, but squales quadratically with the number of cities.
-static void greedy_method(const void *context, const Map *map, void *rng, int **population, int population_size, size_t epoch_number)
+static void greedy_method(const void *context, const Map *map, void *rng, int **population, int population_size, long epoch_number)
 {
 	epoch_number /= population_size; // To be fair compared to previous algorithms.
 
 	const int cities_number = map -> CitiesNumber;
 
-	for (size_t epoch = 0; epoch < epoch_number; ++epoch)
+	for (long epoch = 0; epoch < epoch_number; ++epoch)
 	{
 		int change_number = 0;
 
@@ -249,7 +249,7 @@ static void greedy_method(const void *context, const Map *map, void *rng, int **
 
 
 // Local search using 2-op heuristic. Returns the best found length:
-double localSearch(const void *context, const Map *map, int population_size, size_t epoch_number, localSearchMode mode)
+double localSearch(const void *context, const Map *map, int population_size, long epoch_number, localSearchMode mode)
 {
 	printf("\nLocal search mode: %s\n", LC_StringArray[mode]);
 
@@ -257,9 +257,9 @@ double localSearch(const void *context, const Map *map, int population_size, siz
 
 	int **population = (int**) calloc(population_size, sizeof(int*));
 
-	if (!map || !population)
+	if (!map || !population || population_size < 1 || epoch_number < 0)
 	{
-		printf("Big error!\n");
+		printf("\nInvalid argument in 'localSearch()'.\n\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -272,7 +272,7 @@ double localSearch(const void *context, const Map *map, int population_size, siz
 	}
 
 	rng32 rng;
-	uint64_t seed = create_seed(population);
+	uint64_t seed = DETERMINISTIC ? DEFAULT_SEED : create_seed(population);
 	rng32_init(&rng, seed, 0);
 
 	// Initialization:

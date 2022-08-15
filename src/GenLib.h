@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#define GENLIB_VERSION 1.6
+#define GENLIB_VERSION 1.7
 
 ////////////////////////////////////////////////////////////////////////////////
 // Settings:
@@ -29,6 +29,10 @@ extern "C" {
 // such as the elapsed time, the ratio of epochs at which the global best gene has (first) been
 // found, and the best found fitness value.
 #define GL_VERBOSE_MODE 1
+
+// For speed benchmarks:
+#define GL_DETERMINISTIC 0
+#define GL_DEFAULT_SEED 123456 // used when GL_DETERMINISTIC = 1
 
 ////////////////////////////////////////////////////////////////////////////////
 // Genetic struct:
@@ -71,19 +75,19 @@ typedef struct
 	// As long as GL_SHIFTING_ENABLED = 1, there is no limitation on the sign of the fitness values.
 	// Thus a maximization problem can easily be transformed to a minimization one, by playing with the sign.
 	// Furthermore, the outputs of this function can be made to change through time - time being represented by 'epoch'.
-	double (*fitness)(const void *context, const void *gene, size_t epoch);
+	double (*fitness)(const void *context, const void *gene, long epoch);
 
 	// Crossover beetween two genes. Note that the given fitness values will be shifted, as to be > 0.
 	void (*crossover)(const void *context, void *rng, void *gene_tofill, const void *gene_1, const void *gene_2,
-		double fitness_1, double fitness_2, size_t epoch);
+		double fitness_1, double fitness_2, long epoch);
 
 	// Mutates the newborn gene. A mutation probability (e.g of 0.1) can easily be added by doing inside the function:
 	// if (rng32_nextFloat(rng) < 0.1f) { /* do the mutation */ }
-	void (*mutation)(const void *context, void *rng, void *gene, size_t epoch);
+	void (*mutation)(const void *context, void *rng, void *gene, long epoch);
 
 	// Will trigger an updatePopulationFitness() when returning 1. Do not use it too often,
 	// for this will slow down the genetic search and hinder the convergence. Can be left to NULL.
-	int (*setFitnessUpdateStatus)(const void *context, size_t epoch);
+	int (*setFitnessUpdateStatus)(const void *context, long epoch);
 
 } GeneticMethods;
 
@@ -116,7 +120,7 @@ void destroySpecies(Species **species_address);
 
 // Genetic search. 'Good' genes are beeing seeked by evolving from a population, and the best
 // found gene is saved in 'species -> geneBuffer' and its (unshifted) fitness is returned.
-double geneticSearch(Species *species, size_t epoch_number);
+double geneticSearch(Species *species, long epoch_number);
 
 
 #if __cplusplus
